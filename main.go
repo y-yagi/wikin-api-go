@@ -28,7 +28,7 @@ func getPages(db *gorm.DB) ([]Page, error) {
 	return pages, nil
 }
 
-func Getpages(w http.ResponseWriter, r *http.Request) {
+func GetPages(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("Started %s %s for %s at %s\n", r.Method, r.RequestURI, r.RemoteAddr, time.Now().Format(time.RFC3339))
 
 	var buffer bytes.Buffer
@@ -47,7 +47,7 @@ func Getpages(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, buffer.String())
 }
 
-func Getpage(c web.C, w http.ResponseWriter, r *http.Request) {
+func GetPage(c web.C, w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("Started %s %s for %s at %s\n", r.Method, r.RequestURI, r.RemoteAddr, time.Now().Format(time.RFC3339))
 
 	var page Page
@@ -68,8 +68,8 @@ func main() {
 		return
 	}
 
-	goji.Get("/pages", Getpages)
-	goji.Get("/pages/:id", Getpage)
+	goji.Get("/pages", GetPages)
+	goji.Get("/pages/:id", GetPage)
 	flag.Set("bind", ":"+port)
 	goji.Serve()
 }
