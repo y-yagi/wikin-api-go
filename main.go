@@ -60,7 +60,7 @@ func Getpage(c web.C, w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	var err error
-	db, err = gorm.Open("postgres", "user=yaginuma dbname=wikin")
+	db, err = gorm.Open("postgres", os.Getenv("DATABASE_URL"))
 	port := os.Getenv("PORT")
 
 	if err != nil {
