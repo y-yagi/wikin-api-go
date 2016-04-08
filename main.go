@@ -19,7 +19,7 @@ var (
 	db *gorm.DB
 )
 
-func getPages(db *gorm.DB, size int) ([]Page, error) {
+func getPagesFromDB(db *gorm.DB, size int) ([]Page, error) {
 	var pages []Page = make([]Page, size)
 
 	db.Order("updated_at DESC").Limit(size).Find(&pages)
@@ -39,7 +39,7 @@ func GetPages(w http.ResponseWriter, r *http.Request) {
 
 	var buffer bytes.Buffer
 
-	pages, err := getPages(db, pageSize)
+	pages, err := getPagesFromDB(db, pageSize)
 	if err != nil {
 		log.Fatal(err)
 		return
