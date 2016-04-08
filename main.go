@@ -20,20 +20,27 @@ var (
 	db *gorm.DB
 )
 
-func getPages(db *gorm.DB) ([]Page, error) {
-	var pages []Page = make([]Page, 100)
+func getPages(db *gorm.DB, size int) ([]Page, error) {
+	var pages []Page = make([]Page, size)
 
-	db.Find(&pages)
+	db.Order("updated_at DESC").Limit(size).Find(&pages)
 
 	return pages, nil
 }
 
 func GetPages(w http.ResponseWriter, r *http.Request) {
+	var pageSize int
 	fmt.Printf("Started %s %s for %s at %s\n", r.Method, r.RequestURI, r.RemoteAddr, time.Now().Format(time.RFC3339))
+
+	if r.URL.Query().Get("recent_pages") != "" {
+		pageSize = 10
+	} else {
+		pageSize = 100
+	}
 
 	var buffer bytes.Buffer
 
-	pages, err := getPages(db)
+	pages, err := getPages(db, pageSize)
 	if err != nil {
 		log.Fatal(err)
 		return
