@@ -28,7 +28,6 @@ func getPagesFromDB(db *gorm.DB, size int) ([]Page, error) {
 }
 
 func GetPages(w http.ResponseWriter, r *http.Request) {
-	RecordLog(r)
 	var pageSize int
 
 	if r.URL.Query().Get("recent_pages") != "" {
@@ -54,7 +53,6 @@ func GetPages(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetPage(c web.C, w http.ResponseWriter, r *http.Request) {
-	RecordLog(r)
 	var page Page
 
 	// really safe?
