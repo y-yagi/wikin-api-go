@@ -19,14 +19,6 @@ var (
 	db *gorm.DB
 )
 
-func getPagesFromDB(db *gorm.DB, size int) ([]Page, error) {
-	var pages []Page = make([]Page, size)
-
-	db.Order("updated_at DESC").Limit(size).Find(&pages)
-
-	return pages, nil
-}
-
 func GetPages(w http.ResponseWriter, r *http.Request) {
 	var pageSize int
 
@@ -36,13 +28,9 @@ func GetPages(w http.ResponseWriter, r *http.Request) {
 		pageSize = 100
 	}
 
+	var pages []Page = make([]Page, pageSize)
 	var buffer bytes.Buffer
-
-	pages, err := getPagesFromDB(db, pageSize)
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
+	db.Order("updated_at DESC").Limit(pageSize).Find(&pages)
 
 	for _, page := range pages {
 		mappage, _ := json.Marshal(page)
@@ -55,7 +43,7 @@ func GetPages(w http.ResponseWriter, r *http.Request) {
 func GetPage(c web.C, w http.ResponseWriter, r *http.Request) {
 	var page Page
 
-	// really safe?
+	// TODO: really safe?
 	db.Where("id= ?", c.URLParams["id"]).First(&page)
 	mappage, _ := json.Marshal(page)
 	fmt.Fprint(w, string(mappage))
