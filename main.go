@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 
@@ -43,6 +44,11 @@ func GetPage(c web.C, w http.ResponseWriter, r *http.Request) {
 	var page Page
 
 	db.Find(&page, c.URLParams["id"])
+	if page.Id == 0 {
+		http.Error(w, http.StatusText(404), 404)
+		return
+	}
+
 	mappage, _ := json.Marshal(page)
 	fmt.Fprint(w, string(mappage))
 }
@@ -77,8 +83,7 @@ func main() {
 	port := os.Getenv("PORT")
 
 	if err != nil {
-		http.Error(w, http.StatusText(500), 500)
-		fmt.Println(err)
+		log.Fatal(err)
 		return
 	}
 
