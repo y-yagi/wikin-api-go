@@ -43,8 +43,7 @@ func GetPages(w http.ResponseWriter, r *http.Request) {
 func GetPage(c web.C, w http.ResponseWriter, r *http.Request) {
 	var page Page
 
-	// TODO: really safe?
-	db.Where("id= ?", c.URLParams["id"]).First(&page)
+	db.Find(&page, c.URLParams["id"])
 	mappage, _ := json.Marshal(page)
 	fmt.Fprint(w, string(mappage))
 }
