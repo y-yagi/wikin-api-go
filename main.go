@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 
@@ -59,7 +58,7 @@ func SearchPages(w http.ResponseWriter, r *http.Request) {
 	pages, err := pageSearcher.Matches()
 
 	if err != nil {
-		// TODO: return 500
+		http.Error(w, http.StatusText(500), 500)
 		fmt.Println(err)
 		return
 	}
@@ -78,7 +77,8 @@ func main() {
 	port := os.Getenv("PORT")
 
 	if err != nil {
-		log.Fatal(err)
+		http.Error(w, http.StatusText(500), 500)
+		fmt.Println(err)
 		return
 	}
 
