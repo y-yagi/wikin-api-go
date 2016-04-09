@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/lib/pq"
@@ -77,6 +78,21 @@ func SearchPages(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, buffer.String())
 }
 
+func UpdatePage(c web.C, w http.ResponseWriter, r *http.Request) {
+	var page Page
+
+	db.Find(&page, strings.Replace(c.URLParams["id"], ".json", "", -1))
+	if page.Id == 0 {
+		http.Error(w, http.StatusText(404), 404)
+		return
+	}
+
+	page.Body = r.PostFormValue("page[body]")
+	db.Save(&page)
+	mappage, _ := json.Marshal("status=ok")
+	fmt.Fprint(w, string(mappage))
+}
+
 func main() {
 	var err error
 	db, err = gorm.Open("postgres", os.Getenv("DATABASE_URL"))
@@ -90,6 +106,8 @@ func main() {
 	goji.Get("/pages", GetPages)
 	goji.Get("/pages/search", SearchPages)
 	goji.Get("/pages/:id", GetPage)
+	goji.Put("/pages/:id", UpdatePage)
+
 	flag.Set("bind", ":"+port)
 	goji.Serve()
 }
