@@ -49,6 +49,30 @@ func GetPage(c web.C, w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, string(mappage))
 }
 
+func SearchPages(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query().Get("query")
+	if query == "" {
+		return
+	}
+
+	var buffer bytes.Buffer
+	pageSearcher := PageSearcher{query, db}
+	pages, err := pageSearcher.Matches()
+
+	if err != nil {
+		// TODO: return 500
+		fmt.Println(err)
+		return
+	}
+
+	for _, page := range pages {
+		mappage, _ := json.Marshal(page)
+		buffer.WriteString(string(mappage))
+	}
+
+	fmt.Fprint(w, buffer.String())
+}
+
 func main() {
 	var err error
 	db, err = gorm.Open("postgres", os.Getenv("DATABASE_URL"))
@@ -60,6 +84,7 @@ func main() {
 	}
 
 	goji.Get("/pages", GetPages)
+	goji.Get("/pages/search", SearchPages)
 	goji.Get("/pages/:id", GetPage)
 	flag.Set("bind", ":"+port)
 	goji.Serve()
