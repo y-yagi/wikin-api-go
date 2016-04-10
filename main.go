@@ -103,6 +103,9 @@ func main() {
 		return
 	}
 
+	if os.Getenv("BASIC_AUTH_USER") != "" && os.Getenv("BASIC_AUTH_PASSWORD") != "" {
+		goji.Use(BasicAuth)
+	}
 	goji.Get("/pages", GetPages)
 	goji.Get("/pages/search", SearchPages)
 	goji.Get("/pages/:id", GetPage)
