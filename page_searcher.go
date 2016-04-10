@@ -28,7 +28,7 @@ func (searcher PageSearcher) Matches() ([]Page, error) {
 	var page Page
 
 	// TODO: can use multi parameters
-	rows, err := db.DB().Query("SELECT * FROM pages WHERE "+strings.Join(parts, " OR "), bindings[0], bindings[1])
+	rows, err := db.DB().Query("SELECT id, title, body, created_at, updated_at FROM pages WHERE "+strings.Join(parts, " OR "), bindings[0], bindings[1])
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +36,7 @@ func (searcher PageSearcher) Matches() ([]Page, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		if err := rows.Scan(&page.Id, &page.Title, &page.Body, &page.Parent_Id, &page.Created_at, &page.Updated_at); err != nil {
+		if err := rows.Scan(&page.Id, &page.Title, &page.Body, &page.Created_at, &page.Updated_at); err != nil {
 			return nil, err
 		}
 		pages = append(pages, page)
