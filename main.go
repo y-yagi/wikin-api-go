@@ -93,6 +93,13 @@ func UpdatePage(c web.C, w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, string(mappage))
 }
 
+func Route(m *web.Mux) {
+	m.Get("/pages", GetPages)
+	m.Get("/pages/search", SearchPages)
+	m.Get("/pages/:id", GetPage)
+	m.Put("/pages/:id", UpdatePage)
+}
+
 func main() {
 	var err error
 	db, err = gorm.Open("postgres", os.Getenv("DATABASE_URL"))
@@ -106,11 +113,7 @@ func main() {
 	if os.Getenv("BASIC_AUTH_USER") != "" && os.Getenv("BASIC_AUTH_PASSWORD") != "" {
 		goji.Use(BasicAuth)
 	}
-	goji.Get("/pages", GetPages)
-	goji.Get("/pages/search", SearchPages)
-	goji.Get("/pages/:id", GetPage)
-	goji.Put("/pages/:id", UpdatePage)
-
+	Route(goji.DefaultMux)
 	flag.Set("bind", ":"+port)
 	goji.Serve()
 }
