@@ -103,6 +103,11 @@ func Route(m *web.Mux) {
 func main() {
 	var err error
 	db, err = gorm.Open("postgres", os.Getenv("DATABASE_URL"))
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
 	port := os.Getenv("PORT")
 
 	if err != nil {
