@@ -1,0 +1,14 @@
+language: go
+
+go:
+  - 1.6
+
+install:
+  - go get github.com/jinzhu/gorm
+  - go get github.com/lib/pq
+  - go get github.com/zenazn/goji
+  - go get github.com/zenazn/goji/web
+
+before_script:
+  - psql -c 'create database wikin_test;' -U postgres
+  - psql -f db/structure.sql wikin_test
