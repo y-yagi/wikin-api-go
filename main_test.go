@@ -1,14 +1,24 @@
 package main
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"strings"
 	"testing"
 
 	"github.com/jinzhu/gorm"
 	"github.com/zenazn/goji/web"
 )
+
+func TestMain(m *testing.M) {
+	db, _ = gorm.Open("postgres", "user=yaginuma dbname=wikin_test")
+	code := m.Run()
+	defer os.Exit(code)
+	db.Delete(Page{})
+}
 
 func ParseResponse(res *http.Response) (string, int) {
 	defer res.Body.Close()
@@ -20,14 +30,21 @@ func ParseResponse(res *http.Response) (string, int) {
 }
 
 func Test_Page(t *testing.T) {
-	db, _ = gorm.Open("postgres", "user=yaginuma dbname=wikin_test")
 
 	m := web.New()
 	Route(m)
 	ts := httptest.NewServer(m)
 	defer ts.Close()
 
-	res, err := http.Get(ts.URL + "/pages/2")
+	page := Page{
+		Id:    1,
+		Title: "test title",
+		Body:  "test body",
+	}
+
+	db.Create(&page)
+
+	res, err := http.Get(ts.URL + "/pages/1")
 	if err != nil {
 		t.Error("unexpected")
 	}
@@ -35,7 +52,19 @@ func Test_Page(t *testing.T) {
 	if s != http.StatusOK {
 		t.Error("invalid status code")
 	}
-	if c != `{"id":2,"title":"c","body":"testmessage","created_at":"2016-04-07T05:38:22.798216Z","updated_at":"2016-04-09T17:40:04.128029Z"}` {
-		t.Error("invalid response")
+
+	dec := json.NewDecoder(strings.NewReader(c))
+	var responsePage Page
+	dec.Decode(&responsePage)
+
+	if page.Id != 1 {
+		t.Error("invalid id: ", page.Id)
 	}
+	if page.Title != "test title" {
+		t.Error("invalid title: ", page.Title)
+	}
+	if page.Body != "test body" {
+		t.Error("invalid body: ", page.Body)
+	}
+
 }
