@@ -42,7 +42,10 @@ func Test_Page(t *testing.T) {
 		Body:  "test body",
 	}
 
-	db.Create(&page)
+	result := db.Create(&page)
+	if result.Error != nil {
+		t.Error("test data create error", result.Error)
+	}
 
 	res, err := http.Get(ts.URL + "/pages/1")
 	if err != nil {
@@ -50,7 +53,7 @@ func Test_Page(t *testing.T) {
 	}
 	c, s := ParseResponse(res)
 	if s != http.StatusOK {
-		t.Error("invalid status code")
+		t.Error("invalid status code", s)
 	}
 
 	dec := json.NewDecoder(strings.NewReader(c))
