@@ -20,7 +20,7 @@ func ParseResponse(res *http.Response) (string, int) {
 }
 
 func Test_Page(t *testing.T) {
-	db, _ = gorm.Open("postgres", "user=yaginuma dbname=wikin")
+	db, _ = gorm.Open("postgres", "user=yaginuma dbname=wikin_test")
 
 	m := web.New()
 	Route(m)
