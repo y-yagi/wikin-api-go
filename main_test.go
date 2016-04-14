@@ -14,7 +14,7 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	db, _ = gorm.Open("postgres", "user=yaginuma dbname=wikin_test")
+	db, _ = gorm.Open("postgres", "user=yaginuma dbname=wikin_test  sslmode=disable")
 	code := m.Run()
 	defer os.Exit(code)
 	db.Delete(Page{})
