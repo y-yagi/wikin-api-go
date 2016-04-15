@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -32,15 +33,18 @@ func ParseResponse(res *http.Response) (string, int) {
 
 func generateTestData(t *testing.T) {
 	var page Page
-	page = Page{
-		Id:    1,
-		Title: "test title",
-		Body:  "test body",
-	}
 
-	result := db.Create(&page)
-	if result.Error != nil {
-		t.Error("test data create error", result.Error)
+	for i := 0; i < 5; i++ {
+		page = Page{
+			Id:    i,
+			Title: "test title" + strconv.Itoa(i),
+			Body:  "test body" + strconv.Itoa(i),
+		}
+
+		result := db.Create(&page)
+		if result.Error != nil {
+			t.Error("test data create error", result.Error)
+		}
 	}
 }
 
@@ -68,10 +72,10 @@ func Test_Page(t *testing.T) {
 	if page.Id != 1 {
 		t.Error("invalid id: ", page.Id)
 	}
-	if page.Title != "test title" {
+	if page.Title != "test title1" {
 		t.Error("invalid title: ", page.Title)
 	}
-	if page.Body != "test body" {
+	if page.Body != "test body1" {
 		t.Error("invalid body: ", page.Body)
 	}
 
