@@ -30,14 +30,9 @@ func ParseResponse(res *http.Response) (string, int) {
 	return string(contents), res.StatusCode
 }
 
-func Test_Page(t *testing.T) {
-
-	m := web.New()
-	Route(m)
-	ts := httptest.NewServer(m)
-	defer ts.Close()
-
-	page := Page{
+func generateTestData(t *testing.T) {
+	var page Page
+	page = Page{
 		Id:    1,
 		Title: "test title",
 		Body:  "test body",
@@ -47,7 +42,16 @@ func Test_Page(t *testing.T) {
 	if result.Error != nil {
 		t.Error("test data create error", result.Error)
 	}
+}
 
+func Test_Page(t *testing.T) {
+
+	m := web.New()
+	Route(m)
+	ts := httptest.NewServer(m)
+	defer ts.Close()
+
+	generateTestData(t)
 	res, err := http.Get(ts.URL + "/pages/1")
 	if err != nil {
 		t.Error("unexpected")
@@ -58,8 +62,8 @@ func Test_Page(t *testing.T) {
 	}
 
 	dec := json.NewDecoder(strings.NewReader(c))
-	var responsePage Page
-	dec.Decode(&responsePage)
+	var page Page
+	dec.Decode(&page)
 
 	if page.Id != 1 {
 		t.Error("invalid id: ", page.Id)
