@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -16,10 +17,10 @@ import (
 
 func TestMain(m *testing.M) {
 	db, _ = gorm.Open("postgres", "dbname=wikin_test  sslmode=disable")
+	defer db.Close()
+	generateTestData()
 	code := m.Run()
 	defer os.Exit(code)
-	defer db.Close()
-	db.Delete(Page{})
 }
 
 func ParseResponse(res *http.Response) (string, int) {
@@ -31,10 +32,10 @@ func ParseResponse(res *http.Response) (string, int) {
 	return string(contents), res.StatusCode
 }
 
-func generateTestData(t *testing.T) {
+func generateTestData() {
+	db.Delete(Page{})
 	var page Page
-
-	for i := 0; i < 5; i++ {
+	for i := 1; i < 6; i++ {
 		page = Page{
 			Id:    i,
 			Title: "test title" + strconv.Itoa(i),
@@ -43,7 +44,7 @@ func generateTestData(t *testing.T) {
 
 		result := db.Create(&page)
 		if result.Error != nil {
-			t.Error("test data create error", result.Error)
+			fmt.Printf("test data create error %s", result.Error)
 		}
 	}
 }
@@ -55,7 +56,6 @@ func Test_Page(t *testing.T) {
 	ts := httptest.NewServer(m)
 	defer ts.Close()
 
-	generateTestData(t)
 	res, err := http.Get(ts.URL + "/pages/1")
 	if err != nil {
 		t.Error("unexpected")
@@ -79,4 +79,42 @@ func Test_Page(t *testing.T) {
 		t.Error("invalid body: ", page.Body)
 	}
 
+}
+
+func Test_Pages(t *testing.T) {
+
+	m := web.New()
+	Route(m)
+	ts := httptest.NewServer(m)
+	defer ts.Close()
+
+	res, err := http.Get(ts.URL + "/pages")
+	if err != nil {
+		t.Error("unexpected")
+	}
+	c, s := ParseResponse(res)
+	if s != http.StatusOK {
+		t.Error("invalid status code", s)
+	}
+
+	dec := json.NewDecoder(strings.NewReader(c))
+	var page []Page
+	dec.Decode(&page)
+
+	if len(page) != 5 {
+		t.Error("invalid response: ", c)
+	}
+
+	for i, j := 0, 5; i < 5; i++ {
+		if page[i].Id != j {
+			t.Error("invalid id: ", page[i].Id)
+		}
+		if page[i].Title != "test title"+strconv.Itoa(j) {
+			t.Error("invalid title: ", page[i].Title)
+		}
+		if page[i].Body != "test body"+strconv.Itoa(j) {
+			t.Error("invalid body: ", page[i].Body)
+		}
+		j--
+	}
 }
