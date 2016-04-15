@@ -17,6 +17,7 @@ func TestMain(m *testing.M) {
 	db, _ = gorm.Open("postgres", "dbname=wikin_test  sslmode=disable")
 	code := m.Run()
 	defer os.Exit(code)
+	defer db.Close()
 	db.Delete(Page{})
 }
 
