@@ -93,7 +93,7 @@ func Route(m *web.Mux) {
 	m.Get("/pages", GetPages)
 	m.Get("/pages/search", SearchPages)
 	m.Get("/pages/:id", GetPage)
-	m.Put("/pages/:id", UpdatePage)
+	m.Patch("/pages/:id", UpdatePage)
 }
 
 func main() {

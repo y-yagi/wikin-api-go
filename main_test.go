@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -148,4 +149,44 @@ func Test_SearchPages(t *testing.T) {
 		t.Error("invalid body: ", pages[0].Body)
 	}
 
+}
+
+func Test_UPdatePage(t *testing.T) {
+	ts := startServer()
+	defer ts.Close()
+
+	var bodyStr = []byte("page[body]=update body")
+	req, err := http.NewRequest("PATCH", ts.URL+"/pages/1", bytes.NewBuffer(bodyStr))
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		t.Error("unexpected", err)
+	}
+	c, s := parseResponse(res)
+	if s != http.StatusOK {
+		t.Error("invalid status code", s)
+	}
+
+	res, err = http.Get(ts.URL + "/pages/1")
+	if err != nil {
+		t.Error("unexpected")
+	}
+	c, s = parseResponse(res)
+	if s != http.StatusOK {
+		t.Error("invalid status code", s)
+	}
+
+	dec := json.NewDecoder(strings.NewReader(c))
+	var page Page
+	dec.Decode(&page)
+
+	if page.Body != "update body" {
+		t.Error("invalid body: ", page.Body)
+	}
 }
