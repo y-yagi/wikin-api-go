@@ -23,7 +23,7 @@ func TestMain(m *testing.M) {
 	defer os.Exit(code)
 }
 
-func ParseResponse(res *http.Response) (string, int) {
+func parseResponse(res *http.Response) (string, int) {
 	defer res.Body.Close()
 	contents, err := ioutil.ReadAll(res.Body)
 	if err != nil {
@@ -50,7 +50,6 @@ func generateTestData() {
 }
 
 func Test_Page(t *testing.T) {
-
 	m := web.New()
 	Route(m)
 	ts := httptest.NewServer(m)
@@ -60,7 +59,7 @@ func Test_Page(t *testing.T) {
 	if err != nil {
 		t.Error("unexpected")
 	}
-	c, s := ParseResponse(res)
+	c, s := parseResponse(res)
 	if s != http.StatusOK {
 		t.Error("invalid status code", s)
 	}
@@ -92,29 +91,65 @@ func Test_Pages(t *testing.T) {
 	if err != nil {
 		t.Error("unexpected")
 	}
-	c, s := ParseResponse(res)
+	c, s := parseResponse(res)
 	if s != http.StatusOK {
 		t.Error("invalid status code", s)
 	}
 
 	dec := json.NewDecoder(strings.NewReader(c))
-	var page []Page
-	dec.Decode(&page)
+	var pages []Page
+	dec.Decode(&pages)
 
-	if len(page) != 5 {
+	if len(pages) != 5 {
 		t.Error("invalid response: ", c)
 	}
 
 	for i, j := 0, 5; i < 5; i++ {
-		if page[i].Id != j {
-			t.Error("invalid id: ", page[i].Id)
+		if pages[i].Id != j {
+			t.Error("invalid id: ", pages[i].Id)
 		}
-		if page[i].Title != "test title"+strconv.Itoa(j) {
-			t.Error("invalid title: ", page[i].Title)
+		if pages[i].Title != "test title"+strconv.Itoa(j) {
+			t.Error("invalid title: ", pages[i].Title)
 		}
-		if page[i].Body != "test body"+strconv.Itoa(j) {
-			t.Error("invalid body: ", page[i].Body)
+		if pages[i].Body != "test body"+strconv.Itoa(j) {
+			t.Error("invalid body: ", pages[i].Body)
 		}
 		j--
 	}
+}
+
+func Test_SearchPages(t *testing.T) {
+
+	m := web.New()
+	Route(m)
+	ts := httptest.NewServer(m)
+	defer ts.Close()
+
+	res, err := http.Get(ts.URL + "/pages/search?query=title1")
+	if err != nil {
+		t.Error("unexpected")
+	}
+	c, s := parseResponse(res)
+	if s != http.StatusOK {
+		t.Error("invalid status code", s)
+	}
+
+	dec := json.NewDecoder(strings.NewReader(c))
+	var pages []Page
+	dec.Decode(&pages)
+
+	if len(pages) != 1 {
+		t.Error("invalid response: ", c)
+	}
+
+	if pages[0].Id != 1 {
+		t.Error("invalid id: ", pages[0].Id)
+	}
+	if pages[0].Title != "test title1" {
+		t.Error("invalid title: ", pages[0].Title)
+	}
+	if pages[0].Body != "test body1" {
+		t.Error("invalid body: ", pages[0].Body)
+	}
+
 }
