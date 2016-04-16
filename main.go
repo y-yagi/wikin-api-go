@@ -33,10 +33,8 @@ func GetPages(w http.ResponseWriter, r *http.Request) {
 	var buffer bytes.Buffer
 	db.Order("updated_at DESC").Limit(pageSize).Find(&pages)
 
-	for _, page := range pages {
-		mappage, _ := json.Marshal(page)
-		buffer.WriteString(string(mappage))
-	}
+	mappage, _ := json.Marshal(pages)
+	buffer.WriteString(string(mappage))
 
 	fmt.Fprint(w, buffer.String())
 }
@@ -70,10 +68,8 @@ func SearchPages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, page := range pages {
-		mappage, _ := json.Marshal(page)
-		buffer.WriteString(string(mappage))
-	}
+	mappage, _ := json.Marshal(pages)
+	buffer.WriteString(string(mappage))
 
 	fmt.Fprint(w, buffer.String())
 }
