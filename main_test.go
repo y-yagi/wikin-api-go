@@ -15,12 +15,11 @@ import (
 	"github.com/zenazn/goji/web"
 )
 
-func TestMain(m *testing.M) {
-	db, _ = gorm.Open("postgres", "dbname=wikin_test  sslmode=disable")
-	defer db.Close()
-	generateTestData()
-	code := m.Run()
-	defer os.Exit(code)
+func startServer() *httptest.Server {
+	m := web.New()
+	Route(m)
+	ts := httptest.NewServer(m)
+	return ts
 }
 
 func parseResponse(res *http.Response) (string, int) {
@@ -49,12 +48,17 @@ func generateTestData() {
 	}
 }
 
-func Test_Page(t *testing.T) {
-	m := web.New()
-	Route(m)
-	ts := httptest.NewServer(m)
-	defer ts.Close()
+func TestMain(m *testing.M) {
+	db, _ = gorm.Open("postgres", "dbname=wikin_test  sslmode=disable")
+	defer db.Close()
+	generateTestData()
+	code := m.Run()
+	defer os.Exit(code)
+}
 
+func Test_Page(t *testing.T) {
+	ts := startServer()
+	defer ts.Close()
 	res, err := http.Get(ts.URL + "/pages/1")
 	if err != nil {
 		t.Error("unexpected")
@@ -81,12 +85,8 @@ func Test_Page(t *testing.T) {
 }
 
 func Test_Pages(t *testing.T) {
-
-	m := web.New()
-	Route(m)
-	ts := httptest.NewServer(m)
+	ts := startServer()
 	defer ts.Close()
-
 	res, err := http.Get(ts.URL + "/pages")
 	if err != nil {
 		t.Error("unexpected")
@@ -119,12 +119,8 @@ func Test_Pages(t *testing.T) {
 }
 
 func Test_SearchPages(t *testing.T) {
-
-	m := web.New()
-	Route(m)
-	ts := httptest.NewServer(m)
+	ts := startServer()
 	defer ts.Close()
-
 	res, err := http.Get(ts.URL + "/pages/search?query=title1")
 	if err != nil {
 		t.Error("unexpected")
