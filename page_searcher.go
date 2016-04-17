@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"regexp"
 	"strings"
 
@@ -46,7 +45,6 @@ func (searcher PageSearcher) Matches() ([]Page, error) {
 		return nil, err
 	}
 
-	fmt.Println(pages)
 	return pages, nil
 }
 
