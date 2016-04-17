@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -15,12 +16,11 @@ import (
 	"github.com/zenazn/goji/web"
 )
 
-func TestMain(m *testing.M) {
-	db, _ = gorm.Open("postgres", "dbname=wikin_test  sslmode=disable")
-	defer db.Close()
-	generateTestData()
-	code := m.Run()
-	defer os.Exit(code)
+func startServer() *httptest.Server {
+	m := web.New()
+	Route(m)
+	ts := httptest.NewServer(m)
+	return ts
 }
 
 func parseResponse(res *http.Response) (string, int) {
@@ -49,12 +49,17 @@ func generateTestData() {
 	}
 }
 
-func Test_Page(t *testing.T) {
-	m := web.New()
-	Route(m)
-	ts := httptest.NewServer(m)
-	defer ts.Close()
+func TestMain(m *testing.M) {
+	db, _ = gorm.Open("postgres", "dbname=wikin_test  sslmode=disable")
+	defer db.Close()
+	generateTestData()
+	code := m.Run()
+	defer os.Exit(code)
+}
 
+func Test_Page(t *testing.T) {
+	ts := startServer()
+	defer ts.Close()
 	res, err := http.Get(ts.URL + "/pages/1")
 	if err != nil {
 		t.Error("unexpected")
@@ -81,12 +86,8 @@ func Test_Page(t *testing.T) {
 }
 
 func Test_Pages(t *testing.T) {
-
-	m := web.New()
-	Route(m)
-	ts := httptest.NewServer(m)
+	ts := startServer()
 	defer ts.Close()
-
 	res, err := http.Get(ts.URL + "/pages")
 	if err != nil {
 		t.Error("unexpected")
@@ -119,12 +120,8 @@ func Test_Pages(t *testing.T) {
 }
 
 func Test_SearchPages(t *testing.T) {
-
-	m := web.New()
-	Route(m)
-	ts := httptest.NewServer(m)
+	ts := startServer()
 	defer ts.Close()
-
 	res, err := http.Get(ts.URL + "/pages/search?query=title1")
 	if err != nil {
 		t.Error("unexpected")
@@ -152,4 +149,44 @@ func Test_SearchPages(t *testing.T) {
 		t.Error("invalid body: ", pages[0].Body)
 	}
 
+}
+
+func Test_UPdatePage(t *testing.T) {
+	ts := startServer()
+	defer ts.Close()
+
+	var bodyStr = []byte("page[body]=update body")
+	req, err := http.NewRequest("PATCH", ts.URL+"/pages/1", bytes.NewBuffer(bodyStr))
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		t.Error("unexpected", err)
+	}
+	c, s := parseResponse(res)
+	if s != http.StatusOK {
+		t.Error("invalid status code", s)
+	}
+
+	res, err = http.Get(ts.URL + "/pages/1")
+	if err != nil {
+		t.Error("unexpected")
+	}
+	c, s = parseResponse(res)
+	if s != http.StatusOK {
+		t.Error("invalid status code", s)
+	}
+
+	dec := json.NewDecoder(strings.NewReader(c))
+	var page Page
+	dec.Decode(&page)
+
+	if page.Body != "update body" {
+		t.Error("invalid body: ", page.Body)
+	}
 }
