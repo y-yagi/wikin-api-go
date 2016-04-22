@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -104,8 +103,6 @@ func init() {
 		return
 	}
 
-	port := os.Getenv("PORT")
-
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -115,6 +112,5 @@ func init() {
 		goji.Use(BasicAuth)
 	}
 	Route(goji.DefaultMux)
-	flag.Set("bind", ":"+port)
 	goji.Serve()
 }
