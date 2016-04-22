@@ -17,4 +17,4 @@ before_script:
   - psql -f db/structure.sql wikin_test
 
 script:
-    - ./go_appengine/goapp test
+    - DATABASE_URL="dbname=wikin_test sslmode=disable" ./go_appengine/goapp test

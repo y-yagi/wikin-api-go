@@ -12,7 +12,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jinzhu/gorm"
 	"github.com/zenazn/goji/web"
 )
 
@@ -50,8 +49,6 @@ func generateTestData() {
 }
 
 func TestMain(m *testing.M) {
-	db, _ = gorm.Open("postgres", "dbname=wikin_test  sslmode=disable")
-	defer db.Close()
 	generateTestData()
 	code := m.Run()
 	defer os.Exit(code)
