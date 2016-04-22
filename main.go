@@ -96,7 +96,7 @@ func Route(m *web.Mux) {
 	m.Patch("/pages/:id", UpdatePage)
 }
 
-func main() {
+func init() {
 	var err error
 	db, err = gorm.Open("postgres", os.Getenv("DATABASE_URL"))
 	if err != nil {
