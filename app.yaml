@@ -7,4 +7,4 @@ handlers:
 - url: /.*
   script: _go_app
 env_variables:
-  DATABASE_URL: 'user=yaginuma dbname=wikin'
+  DATABASE_URL: 'dbname=wikin'
