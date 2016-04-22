@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -96,15 +95,13 @@ func Route(m *web.Mux) {
 	m.Patch("/pages/:id", UpdatePage)
 }
 
-func main() {
+func init() {
 	var err error
 	db, err = gorm.Open("postgres", os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
-
-	port := os.Getenv("PORT")
 
 	if err != nil {
 		log.Fatal(err)
@@ -115,6 +112,5 @@ func main() {
 		goji.Use(BasicAuth)
 	}
 	Route(goji.DefaultMux)
-	flag.Set("bind", ":"+port)
 	goji.Serve()
 }

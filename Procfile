@@ -1,1 +1,0 @@
-web: wikin-api-go
