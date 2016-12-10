@@ -3,27 +3,24 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"flag"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
-	"strings"
 
 	"github.com/jinzhu/gorm"
+	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 	_ "github.com/lib/pq"
-	"github.com/zenazn/goji"
-	"github.com/zenazn/goji/web"
 )
 
 var (
 	db *gorm.DB
 )
 
-func GetPages(w http.ResponseWriter, r *http.Request) {
+func getPages(c echo.Context) error {
 	var pageSize int
 
-	if r.URL.Query().Get("recent_pages") != "" {
+	if c.QueryParam("recent_pages") != "" {
 		pageSize = 10
 	} else {
 		pageSize = 100
@@ -36,26 +33,25 @@ func GetPages(w http.ResponseWriter, r *http.Request) {
 	mappage, _ := json.Marshal(pages)
 	buffer.WriteString(string(mappage))
 
-	fmt.Fprint(w, buffer.String())
+	return c.String(http.StatusOK, buffer.String())
 }
 
-func GetPage(c web.C, w http.ResponseWriter, r *http.Request) {
+func getPage(c echo.Context) error {
 	var page Page
 
-	db.Find(&page, c.URLParams["id"])
+	db.Find(&page, c.Param("id"))
 	if page.Id == 0 {
-		http.Error(w, http.StatusText(404), 404)
-		return
+		return echo.NewHTTPError(http.StatusNotFound, "Not found")
 	}
 
 	mappage, _ := json.Marshal(page)
-	fmt.Fprint(w, string(mappage))
+	return c.String(http.StatusOK, string(mappage))
 }
 
-func SearchPages(w http.ResponseWriter, r *http.Request) {
-	query := r.URL.Query().Get("query")
+func searchPages(c echo.Context) error {
+	query := c.QueryParam("query")
 	if query == "" {
-		return
+		return c.String(http.StatusOK, "")
 	}
 
 	var buffer bytes.Buffer
@@ -63,37 +59,35 @@ func SearchPages(w http.ResponseWriter, r *http.Request) {
 	pages, err := pageSearcher.Matches()
 
 	if err != nil {
-		http.Error(w, http.StatusText(500), 500)
-		fmt.Println(err)
-		return
+		// TODO: error handling
+		return echo.NewHTTPError(http.StatusInternalServerError, "internal error")
 	}
 
 	mappage, _ := json.Marshal(pages)
 	buffer.WriteString(string(mappage))
 
-	fmt.Fprint(w, buffer.String())
+	return c.String(http.StatusOK, buffer.String())
 }
 
-func UpdatePage(c web.C, w http.ResponseWriter, r *http.Request) {
+func updatePage(c echo.Context) error {
 	var page Page
 
-	db.Find(&page, strings.Replace(c.URLParams["id"], ".json", "", -1))
+	db.Find(&page, c.Param("id"), ".json", "", -1)
 	if page.Id == 0 {
-		http.Error(w, http.StatusText(404), 404)
-		return
+		return echo.NewHTTPError(http.StatusNotFound, "Not found")
 	}
 
-	page.Body = r.PostFormValue("page[body]")
+	page.Body = c.FormValue("page[body]")
 	db.Save(&page)
 	mappage, _ := json.Marshal("status=ok")
-	fmt.Fprint(w, string(mappage))
+	return c.String(http.StatusOK, string(mappage))
 }
 
-func Route(m *web.Mux) {
-	m.Get("/pages", GetPages)
-	m.Get("/pages/search", SearchPages)
-	m.Get("/pages/:id", GetPage)
-	m.Patch("/pages/:id", UpdatePage)
+func Route(e *echo.Echo) {
+	e.GET("/pages", getPages)
+	e.GET("/pages/search", searchPages)
+	e.GET("/pages/:id", getPage)
+	e.PATCH("/pages:id", updatePage)
 }
 
 func main() {
@@ -105,16 +99,16 @@ func main() {
 	}
 
 	port := os.Getenv("PORT")
-
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
+	e := echo.New()
 
 	if os.Getenv("BASIC_AUTH_USER") != "" && os.Getenv("BASIC_AUTH_PASSWORD") != "" {
-		goji.Use(BasicAuth)
+		e.Use(middleware.BasicAuth(func(username, password string) bool {
+			if username == os.Getenv("BASIC_AUTH_USER") && password == os.Getenv("BASIC_AUTH_PASSWORD") {
+				return true
+			}
+			return false
+		}))
 	}
-	Route(goji.DefaultMux)
-	flag.Set("bind", ":"+port)
-	goji.Serve()
+	Route(e)
+	e.Logger.Fatal(e.Start(":" + port))
 }
