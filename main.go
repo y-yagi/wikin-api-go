@@ -63,6 +63,10 @@ func searchPages(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "internal error")
 	}
 
+	if len(pages) == 0 {
+		return c.String(http.StatusOK, "")
+	}
+
 	mappage, _ := json.Marshal(pages)
 	buffer.WriteString(string(mappage))
 
