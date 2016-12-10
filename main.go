@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -78,6 +79,7 @@ func updatePage(c echo.Context) error {
 
 	db.Find(&page, c.Param("id"), ".json", "", -1)
 	if page.Id == 0 {
+		fmt.Printf("DEBUG: %v\n", c.Param("id"))
 		return echo.NewHTTPError(http.StatusNotFound, "Not found")
 	}
 
@@ -88,9 +90,9 @@ func updatePage(c echo.Context) error {
 }
 
 func Route(e *echo.Echo) {
+	e.GET("/pages/:id", getPage)
 	e.GET("/pages", getPages)
 	e.GET("/pages/search", searchPages)
-	e.GET("/pages/:id", getPage)
 	e.PATCH("/pages:id", updatePage)
 }
 

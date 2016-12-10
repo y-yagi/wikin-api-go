@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -13,24 +12,8 @@ import (
 	"testing"
 
 	"github.com/jinzhu/gorm"
-	"github.com/zenazn/goji/web"
+	"github.com/labstack/echo"
 )
-
-func startServer() *httptest.Server {
-	m := web.New()
-	Route(m)
-	ts := httptest.NewServer(m)
-	return ts
-}
-
-func parseResponse(res *http.Response) (string, int) {
-	defer res.Body.Close()
-	contents, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		panic(err)
-	}
-	return string(contents), res.StatusCode
-}
 
 func generateTestData() {
 	db.Delete(Page{})
@@ -58,18 +41,27 @@ func TestMain(m *testing.M) {
 }
 
 func Test_Page(t *testing.T) {
-	ts := startServer()
-	defer ts.Close()
-	res, err := http.Get(ts.URL + "/pages/1")
+	e := echo.New()
+
+	req, err := http.NewRequest(echo.GET, "/pages/1", nil)
 	if err != nil {
 		t.Error("unexpected")
 	}
-	c, s := parseResponse(res)
-	if s != http.StatusOK {
-		t.Error("invalid status code", s)
+
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	c.SetPath("/pages/:id")
+	c.SetParamNames("id")
+	c.SetParamValues("1")
+
+	getPage(c)
+
+	if rec.Code != http.StatusOK {
+		t.Error("invalid status code", rec.Code)
 	}
 
-	dec := json.NewDecoder(strings.NewReader(c))
+	dec := json.NewDecoder(strings.NewReader(rec.Body.String()))
 	var page Page
 	dec.Decode(&page)
 
@@ -82,22 +74,26 @@ func Test_Page(t *testing.T) {
 	if page.Body != "test body1" {
 		t.Error("invalid body: ", page.Body)
 	}
-
 }
 
 func Test_Pages(t *testing.T) {
-	ts := startServer()
-	defer ts.Close()
-	res, err := http.Get(ts.URL + "/pages")
+	e := echo.New()
+
+	req, err := http.NewRequest(echo.GET, "/pages", nil)
 	if err != nil {
 		t.Error("unexpected")
 	}
-	c, s := parseResponse(res)
-	if s != http.StatusOK {
-		t.Error("invalid status code", s)
+
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	getPages(c)
+
+	if rec.Code != http.StatusOK {
+		t.Error("invalid status code", rec.Code)
 	}
 
-	dec := json.NewDecoder(strings.NewReader(c))
+	dec := json.NewDecoder(strings.NewReader(rec.Body.String()))
 	var pages []Page
 	dec.Decode(&pages)
 
@@ -120,18 +116,23 @@ func Test_Pages(t *testing.T) {
 }
 
 func Test_SearchPages(t *testing.T) {
-	ts := startServer()
-	defer ts.Close()
-	res, err := http.Get(ts.URL + "/pages/search?query=title1")
+	e := echo.New()
+
+	req, err := http.NewRequest(echo.GET, "/pages/search?query=title1", nil)
 	if err != nil {
 		t.Error("unexpected")
 	}
-	c, s := parseResponse(res)
-	if s != http.StatusOK {
-		t.Error("invalid status code", s)
-	}
 
-	dec := json.NewDecoder(strings.NewReader(c))
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	c.SetPath("/pages/search")
+	c.SetParamNames("query")
+	c.SetParamValues("title1")
+
+	searchPages(c)
+
+	dec := json.NewDecoder(strings.NewReader(rec.Body.String()))
 	var pages []Page
 	dec.Decode(&pages)
 
@@ -151,40 +152,31 @@ func Test_SearchPages(t *testing.T) {
 
 }
 
-func Test_UPdatePage(t *testing.T) {
-	ts := startServer()
-	defer ts.Close()
+func Test_UpdatePage(t *testing.T) {
+	e := echo.New()
 
 	var bodyStr = []byte("page[body]=update body")
-	req, err := http.NewRequest("PATCH", ts.URL+"/pages/1", bytes.NewBuffer(bodyStr))
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
-	client := &http.Client{}
-	res, err := client.Do(req)
+	req, err := http.NewRequest(echo.PATCH, "/pages/1", bytes.NewBuffer(bodyStr))
 	if err != nil {
 		t.Error("unexpected", err)
 	}
-	c, s := parseResponse(res)
-	if s != http.StatusOK {
-		t.Error("invalid status code", s)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationForm)
+
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	c.SetPath("/pages/:id")
+	c.SetParamNames("id")
+	c.SetParamValues("1")
+
+	updatePage(c)
+
+	if rec.Code != http.StatusOK {
+		t.Error("invalid status code", rec.Code)
 	}
 
-	res, err = http.Get(ts.URL + "/pages/1")
-	if err != nil {
-		t.Error("unexpected")
-	}
-	c, s = parseResponse(res)
-	if s != http.StatusOK {
-		t.Error("invalid status code", s)
-	}
-
-	dec := json.NewDecoder(strings.NewReader(c))
 	var page Page
-	dec.Decode(&page)
+	db.Find(&page, "1")
 
 	if page.Body != "update body" {
 		t.Error("invalid body: ", page.Body)
