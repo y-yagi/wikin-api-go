@@ -4,12 +4,47 @@
 	"GodepVersion": "v62",
 	"Deps": [
 		{
+			"ImportPath": "github.com/dgrijalva/jwt-go",
+			"Comment": "v3.0.0-10-g9ed569b",
+			"Rev": "9ed569b5d1ac936e6494082958d63a6aa4fff99a"
+		},
+		{
 			"ImportPath": "github.com/jinzhu/gorm",
 			"Rev": "5174cc5c242a728b435ea2be8a2f7f998e15429b"
 		},
 		{
 			"ImportPath": "github.com/jinzhu/inflection",
 			"Rev": "3272df6c21d04180007eb3349844c89a3856bc25"
+		},
+		{
+			"ImportPath": "github.com/labstack/echo",
+			"Comment": "v3.0.3-4-g95e1bd4",
+			"Rev": "95e1bd485f216ceb8d10e9f4cd3f65b49c1130ab"
+		},
+		{
+			"ImportPath": "github.com/labstack/echo/middleware",
+			"Comment": "v3.0.3-4-g95e1bd4",
+			"Rev": "95e1bd485f216ceb8d10e9f4cd3f65b49c1130ab"
+		},
+		{
+			"ImportPath": "github.com/labstack/gommon/bytes",
+			"Comment": "v0.1.0-2-g447fe74",
+			"Rev": "447fe7433567c785af957e549aadae2bf2000071"
+		},
+		{
+			"ImportPath": "github.com/labstack/gommon/color",
+			"Comment": "v0.1.0-2-g447fe74",
+			"Rev": "447fe7433567c785af957e549aadae2bf2000071"
+		},
+		{
+			"ImportPath": "github.com/labstack/gommon/log",
+			"Comment": "v0.1.0-2-g447fe74",
+			"Rev": "447fe7433567c785af957e549aadae2bf2000071"
+		},
+		{
+			"ImportPath": "github.com/labstack/gommon/random",
+			"Comment": "v0.1.0-2-g447fe74",
+			"Rev": "447fe7433567c785af957e549aadae2bf2000071"
 		},
 		{
 			"ImportPath": "github.com/lib/pq",
@@ -22,39 +57,42 @@
 			"Rev": "3cd0097429be7d611bb644ef85b42bfb102ceea4"
 		},
 		{
-			"ImportPath": "github.com/zenazn/goji",
-			"Comment": "v0.9.0-43-g1925ec6",
-			"Rev": "1925ec6302925f4760d7a11cc17036f44ec98d5b"
+			"ImportPath": "github.com/mattn/go-colorable",
+			"Comment": "v0.0.6-9-gd228849",
+			"Rev": "d228849504861217f796da67fae4f6e347643f15"
 		},
 		{
-			"ImportPath": "github.com/zenazn/goji/bind",
-			"Comment": "v0.9.0-43-g1925ec6",
-			"Rev": "1925ec6302925f4760d7a11cc17036f44ec98d5b"
+			"ImportPath": "github.com/mattn/go-isatty",
+			"Rev": "30a891c33c7cde7b02a981314b4228ec99380cca"
 		},
 		{
-			"ImportPath": "github.com/zenazn/goji/graceful",
-			"Comment": "v0.9.0-43-g1925ec6",
-			"Rev": "1925ec6302925f4760d7a11cc17036f44ec98d5b"
+			"ImportPath": "github.com/tylerb/graceful",
+			"Comment": "v1.2.13-2-g4df1190",
+			"Rev": "4df1190835320af7076dfcf27b3d071fd3612caf"
 		},
 		{
-			"ImportPath": "github.com/zenazn/goji/graceful/listener",
-			"Comment": "v0.9.0-43-g1925ec6",
-			"Rev": "1925ec6302925f4760d7a11cc17036f44ec98d5b"
+			"ImportPath": "github.com/valyala/fasttemplate",
+			"Rev": "3b874956e03f1636d171bda64b130f9135f42cff"
 		},
 		{
-			"ImportPath": "github.com/zenazn/goji/web",
-			"Comment": "v0.9.0-43-g1925ec6",
-			"Rev": "1925ec6302925f4760d7a11cc17036f44ec98d5b"
+			"ImportPath": "golang.org/x/crypto/acme",
+			"Rev": "b07d8c96772f426812d3fc5530710ec1f3b205e7"
 		},
 		{
-			"ImportPath": "github.com/zenazn/goji/web/middleware",
-			"Comment": "v0.9.0-43-g1925ec6",
-			"Rev": "1925ec6302925f4760d7a11cc17036f44ec98d5b"
+			"ImportPath": "golang.org/x/crypto/acme/autocert",
+			"Rev": "b07d8c96772f426812d3fc5530710ec1f3b205e7"
 		},
 		{
-			"ImportPath": "github.com/zenazn/goji/web/mutil",
-			"Comment": "v0.9.0-43-g1925ec6",
-			"Rev": "1925ec6302925f4760d7a11cc17036f44ec98d5b"
+			"ImportPath": "golang.org/x/net/context",
+			"Rev": "e31bd588d1077ee66a958c0ad3a235f2084b4195"
+		},
+		{
+			"ImportPath": "golang.org/x/net/context/ctxhttp",
+			"Rev": "e31bd588d1077ee66a958c0ad3a235f2084b4195"
+		},
+		{
+			"ImportPath": "golang.org/x/sys/unix",
+			"Rev": "8f0908ab3b2457e2e15403d3697c9ef5cb4b57a9"
 		}
 	]
 }
