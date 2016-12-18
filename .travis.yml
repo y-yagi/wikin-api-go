@@ -6,8 +6,8 @@ go:
 install:
   - go get github.com/jinzhu/gorm
   - go get github.com/lib/pq
-  - go get github.com/zenazn/goji
-  - go get github.com/zenazn/goji/web
+  - go get github.com/labstack/echo
+  - go get github.com/dgrijalva/jwt-go
 
 before_script:
   - psql -c 'create database wikin_test;' -U postgres
