@@ -1,0 +1,7 @@
+package: github.com/y-yagi/wikin-api-go
+import:
+- package: github.com/jinzhu/gorm
+- package: github.com/labstack/echo
+  subpackages:
+  - middleware
+- package: github.com/lib/pq
